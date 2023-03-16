@@ -109,17 +109,20 @@ get_info () {
   rows=$(stty size | cut -d\  -f1)
   columns=$(stty size | cut -d\  -f2)
 
-  # get monitor name
-  monname=$(xrandr --listactivemonitors | cut -b 34-50 | tail -1)
-
-  # get monitor resolution
-  res=$(xrandr | head -3 | tail -1 | cut -b 4-17)
-
-  # get refresh rate
-  hrz=$(xrandr | head -3 | tail -1 |cut -b 18-19)
-
   # get session type
   session=$(loginctl show-session "$XDG_SESSION_ID" -p Type | cut -b 6-20)
+
+  # get monitor stuff
+  if [ $session = "wayland" ]
+  then
+    monname=$(wlr-randr --listactivemonitors | cut -b 34-50 | tail -1)
+    res=$(wlr-randr | head -3 | tail -1 | cut -b 4-17)
+    hrz=$(wlr-randr | head -3 | tail -1 | cut -b 18-19)
+  else
+    monname=$(xrandr --listactivemonitors | cut -b 34-50 | tail -1)
+    res=$(xrandr | head -3 | tail -1 | cut -b 4-17)
+    hrz=$(xrandr | head -3 | tail -1 | cut -b 18-19)
+  fi
 
   # get process count
   processes=$(ps -e | wc -l)
