@@ -1,0 +1,169 @@
+#!/bin/bash
+
+# The GPLv3 License (GPLv3)
+
+# Copyright (c) 2023 poacher
+
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.     
+
+# SUPPORTED INIT SYSTEMS: systemd, runit (more to come)
+# SUPPORTED APP LAUNCHERS: rofi, dmenu, ulauncher, wofi 
+# SUPPORTED NOTIF DAEMONS: dunst, xfce4-notifyd (more to come)
+# SUPPORTED BARS: all of them that have bar in the name
+ 
+get_info () {
+  # get init system
+  if [ -d "/etc/systemd" ]
+  then
+    init="systemd"
+    init1="|--- ​  ‎ ‎ ‎ ‎ ​ ---|"
+    init2="| ​ -- ‎ ‎ ‎ ‎ /| ‎ |"
+    init3="| ---- ​ ​ / ​| ​ |"
+    init4="| ---- ​ ​ \ | ​ |"
+    init5="| ​ --  ​ ​ ​ \| ​ |"
+    init6="|--- ​  ​ ​ ​ ​ ---|"
+  elif [ -d "/etc/runit" ]
+  then
+    init="runit"
+    init1="N/A N/A N/A N/A "
+    init2="N/A N/A N/A N/A "
+    init3="N/A N/A N/A N/A "
+    init4="N/A N/A N/A N/A "
+    init5="N/A N/A N/A N/A "
+    init6="N/A N/A N/A N/A "
+  else
+    echo "idk"
+  fi
+
+  # get app launcher
+  if [ -f "/usr/bin/rofi" ]
+  then
+    launcher="rofi"
+  elif [ -f "/usr/bin/dmenu" ]
+  then
+    launcher="dmenu"
+  elif [ -f "/usr/bin/ulauncher" ]
+  then
+    launcher="ulauncher"
+  elif [ -f "/usr/bin/wofi" ]
+  then
+    launcher="wofi"
+  else
+    launcher="Unknown Launcher"
+  fi
+
+  # get notifications
+  if [ -f "/usr/bin/dunst" ]
+  then
+    notifs="dunst"
+  elif [ -f "/usr/bin/xfce4-notifyd-config" ]
+  then
+    notifs="xfce4-notifyd"
+  else
+    notifs="Unknown Notif Daemon"
+  fi
+
+  # get coreutils
+  if [ -d "/usr/include/gnu" ]
+  then
+    coreutils="gnu"
+  else
+    coreutils="busybox"
+  fi
+
+  # get audio
+  audio=$(ps -e | grep "pulse" | cut -b 27-40 | tail -n 1)
+
+  # get bar
+  if [ -f "/usr/bin/eww" ]
+  then
+    bar="eww"
+  else
+    bar=$(ps -e | grep "bar" | cut -b 27-40 | tail -n 1)
+  fi
+  
+  # get shell
+  shell=$(echo $SHELL | cut -b 6-10)
+
+  # get rows and columns
+  rows=$(stty size | cut -d\  -f1)
+  columns=$(stty size | cut -d\  -f2)
+
+  # get monitor name
+  monname=$(xrandr --listactivemonitors | cut -b 34-50 | tail -1)
+
+  # get monitor resolution
+  res=$(xrandr | head -3 | tail -1 | cut -b 4-17)
+
+  # get refresh rate
+  hrz=$(xrandr | head -3 | tail -1 |cut -b 18-19)
+
+  # get session type
+  session=$(loginctl show-session "$XDG_SESSION_ID" -p Type | cut -b 6-20)
+
+  # get process count
+  processes=$(ps -e | wc -l)
+}
+
+user_info () {
+  echo -e "\e[32mUser\e[0m"
+  echo "--------"
+  echo $USER
+  echo 
+
+}
+
+screen_info () {
+  echo ""
+  echo -e "|-------------| \e[33mScreen\e[0m"
+  echo "|             | --------"
+  echo "|             | $monname"
+  echo "|             | $res"
+  echo "|----|---|----| $hrz hrz"
+  echo "     |___|     "
+}
+
+sys_info () {
+  echo ""
+  echo -e $init1 "\e[34mSystem\e[0m"
+  echo $init2 "--------"
+  echo "$init3 $init | $coreutils"
+  echo "$init4 $launcher    | $audio"
+  echo "$init5 $notifs   | $session"
+  echo "$init6 $bar | $processes processes"
+}
+
+terminal_info () {
+  echo ""
+  echo -e "|-------------| \e[36mTerminal\e[0m"
+  echo "|~ $          | --------"
+  echo "|             | $TERM"
+  echo "|             | $COLORTERM"
+  echo "|             | $rows x $columns"
+  echo "|-------------| $shell"
+}
+
+colors () {
+  echo ""
+  echo -e "\e[31m▮▮▮▮▮\e[0m\e[37m▮▮▮▮▮\e[0m\e[34m▮▮▮▮▮\e[0m"
+  echo -e "\e[32m▮▮▮▮▮\e[0m\e[38m▮▮▮▮▮\e[0m\e[35m▮▮▮▮▮\e[0m"
+  echo -e "\e[33m▮▮▮▮▮\e[0m\e[30m▮▮▮▮▮\e[0m\e[36m▮▮▮▮▮\e[0m"
+}
+
+get_info
+# user_info
+sys_info
+screen_info
+terminal_info
+colors
