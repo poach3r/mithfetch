@@ -1,2 +1,3 @@
-# mithfetch
-A fetch script made in 3 hours.
+# Made in Three Hours Fetch
+
+mithfetch is a fetch script which grabs basic misc information usually not displayed by other fetch scripts.
