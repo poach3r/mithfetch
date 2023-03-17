@@ -68,6 +68,9 @@ get_info () {
   elif [ -f "/usr/bin/wofi" ]
   then
     launcher="wofi"
+  elif [ -f "/usr/bin/fuzzel" ]
+  then
+    launcher="fuzzel"
   else
     launcher="Unknown Launcher"
   fi
@@ -79,6 +82,9 @@ get_info () {
   elif [ -f "/usr/bin/xfce4-notifyd-config" ]
   then
     notifs="xfce4-notifyd"
+  elif [ -f "/usr/bin/mako" ]
+  then
+    notifs="mako"
   else
     notifs="Unknown Notif Daemon"
   fi
@@ -115,9 +121,9 @@ get_info () {
   # get monitor stuff
   if [ $session = "wayland" ]
   then
-    monname=$(wlr-randr --listactivemonitors | cut -b 34-50 | tail -1)
-    res=$(wlr-randr | head -3 | tail -1 | cut -b 4-17)
-    hrz=$(wlr-randr | head -3 | tail -1 | cut -b 18-19)
+    monname=$(wlr-randr | head -1  | awk '{ print $1 }')
+    res=$(wlr-randr | head -8 | tail -1 | cut -b 5-14)
+    hrz=$(wlr-randr | head -8 | tail -1 | cut -b 19-20)
   else
     monname=$(xrandr --listactivemonitors | cut -b 34-50 | tail -1)
     res=$(xrandr | head -3 | tail -1 | cut -b 4-17)
@@ -151,8 +157,8 @@ sys_info () {
   echo -e $init1 "\e[34mSystem\e[0m"
   echo $init2 "--------"
   echo "$init3 $init | $coreutils"
-  echo "$init4 $launcher    | $audio"
-  echo "$init5 $notifs   | $session"
+  echo "$init4 $launcher | $audio"
+  echo "$init5 $notifs | $session"
   echo "$init6 $bar | $processes processes"
 }
 
